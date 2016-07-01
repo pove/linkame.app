@@ -3,4 +3,5 @@
   <style name="MyCustomTheme" parent="android:Theme.Holo.Light">
     <!-- Your customizations go here -->
   </style>
+  
 </resources>
