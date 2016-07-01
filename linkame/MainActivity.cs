@@ -8,7 +8,7 @@ using Android.OS;
 
 namespace linkame
 {
-    [Activity(Label = "linkame", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "Linkame", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity
     {
         int count = 1;
