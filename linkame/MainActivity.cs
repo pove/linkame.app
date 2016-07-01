@@ -9,6 +9,7 @@ using Android.OS;
 namespace linkame
 {
     [Activity(Label = "Linkame", MainLauncher = true, Icon = "@drawable/icon")]
+    [IntentFilter(new[] { Intent.ActionSend }, Categories = new[] {Intent.CategoryDefault, Intent.CategoryBrowsable}, DataMimeType = "text/plain")]
     public class MainActivity : Activity
     {
         int count = 1;
@@ -16,6 +17,12 @@ namespace linkame
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+
+            if (!String.IsNullOrEmpty(Intent.GetStringExtra(Intent.ExtraText)))
+            {
+                string subject = Intent.GetStringExtra(Intent.ExtraSubject) ?? "subject not available";
+                Toast.MakeText(this, subject, ToastLength.Long).Show();
+            }
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
