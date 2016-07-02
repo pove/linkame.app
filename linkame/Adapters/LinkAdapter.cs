@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Java.Lang;
 using linkame.Models;
 
 namespace linkame.Adapters
@@ -28,13 +29,13 @@ namespace linkame.Adapters
         {
             get
             {
-                throw new NotImplementedException();
+                return _links[position];
             }
         }
 
         public override long GetItemId(int position)
         {
-            return position;
+            return _links[position].Id;
         }
 
         public override int Count
