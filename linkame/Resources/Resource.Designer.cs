@@ -79,6 +79,9 @@ namespace linkame
 			// aapt resource value: 0x7f070000
 			public const int MyButton = 2131165184;
 			
+			// aapt resource value: 0x7f070001
+			public const int listView1 = 2131165185;
+			
 			static Id()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
