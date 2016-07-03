@@ -15,13 +15,15 @@ using System.Collections.Generic;
 
 namespace linkame
 {
-    [Activity(Label = "Linkame", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "Linkame", MainLauncher = true, Icon = "@drawable/icon",
+        FinishOnTaskLaunch = true, // to prevent recreate the last link again when reopen
+        ConfigurationChanges = Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize)] // to prevent recreate the last link again when orientation changed
     [IntentFilter(new[] { Intent.ActionMain }, Categories = new[] { Intent.CategoryLauncher })]
     [IntentFilter(new[] { Intent.ActionSend }, Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }, DataMimeType = "text/plain")]
     public class MainActivity : ListActivity
     {
         // Links api url.
-        string url = "http://192.168.0.104/linkame/api/public/";
+        string url = "http://192.168.0.X/linkame/api/public/";
 
         // Local file to store links
         string linksPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "linkslist.json");
@@ -36,7 +38,7 @@ namespace linkame
             // Check if we are receiving something from intent filter
             if (String.IsNullOrEmpty(Intent.GetStringExtra(Intent.ExtraText)))
             {
-                // If not, retrieve links data from service
+                // If not, retrieve links data from local file or service
                 ProcessLinksAsync();
             }
             else
@@ -44,6 +46,14 @@ namespace linkame
                 // If so, send link data to the service
                 SendLink();
             }
+        }
+
+        public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+
+            // Update links data from service
+            ProcessLinksAsync(true);
         }
 
         void listView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
