@@ -2,6 +2,7 @@
 <resources>
   <style name="MyCustomTheme" parent="android:Theme.Holo.Light">
     <!-- Your customizations go here -->
+    <item name="android:statusBarColor">@color/dark</item>
   </style>
   
 </resources>

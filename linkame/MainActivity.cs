@@ -22,9 +22,6 @@ namespace linkame
     [IntentFilter(new[] { Intent.ActionSend }, Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable }, DataMimeType = "text/plain")]
     public class MainActivity : ListActivity
     {
-        // Links api url.
-        string url = "http://192.168.0.X/linkame/api/public/";
-
         // Local file to store links
         string linksPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "linkslist.json");
 
@@ -44,7 +41,19 @@ namespace linkame
             else
             {
                 // If so, send link data to the service
-                SendLink();
+                string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "Name not available";
+                string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
+                if (RestService.SendLink(intentName, intentUrl))
+                {
+                    Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
+
+                    // Retrieve all links data
+                    ProcessLinksAsync(true);
+                }
+                else
+                {
+                    Toast.MakeText(this, "Ups! Link is not added", ToastLength.Short).Show();
+                }
             }
         }
 
@@ -54,6 +63,31 @@ namespace linkame
 
             // Update links data from service
             ProcessLinksAsync(true);
+        }
+
+        public override bool OnCreateOptionsMenu(IMenu menu)
+        {
+            base.OnCreateOptionsMenu(menu);
+            MenuInflater.Inflate(Resource.Layout.MainMenu, menu);
+            return true;
+        }
+
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case Resource.Id.add_device:
+                    ShowAddDeviceDialog();
+                    return true;
+            }
+            return base.OnOptionsItemSelected(item);
+        }
+
+        public void ShowAddDeviceDialog()
+        {
+            var transaction = FragmentManager.BeginTransaction();
+            var dialogFragment = new AddDeviceDialog();            
+            dialogFragment.Show(transaction, "Add device");
         }
 
         void listView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
@@ -84,7 +118,17 @@ namespace linkame
             alert.SetNegativeButton("Delete", (senderAlert, args) =>
             {
                 // Delete link
-                DeleteLink(link.Id);
+                if (RestService.DeleteLink(link.Id))
+                {
+                    Toast.MakeText(this, "Link deleted", ToastLength.Short).Show();
+
+                    // Retrieve all links data again
+                    ProcessLinksAsync(true);
+                }
+                else
+                {
+                    Toast.MakeText(this, "Ups! Link is not deleted", ToastLength.Short).Show();
+                }
             });
 
             //run the alert in UI thread to display in the screen
@@ -92,74 +136,7 @@ namespace linkame
             {
                 alert.Show();
             });
-        }
-
-        // Send link received to the service and retrieve existing links
-        private void SendLink()
-        {
-            try
-            {
-                string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "name not available";
-                string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
-
-                // Create an HTTP web request using the URL:
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url + "link"));
-                request.ContentType = "application/json";
-                request.Method = "POST";
-
-                // Create json object value to post on the service:
-                JsonObject value = new JsonObject(new KeyValuePair<string, JsonValue>("name", intentName), new KeyValuePair<string, JsonValue>("url", intentUrl));
-
-                // Write data to the request:
-                using (var writer = new StreamWriter(request.GetRequestStream()))
-                {
-                    writer.Write(value.ToString());
-                }
-
-                // Send the request to the server and wait for the response:
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    if (response.StatusCode == HttpStatusCode.Created)
-                    {
-                        Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
-
-                        // Retrieve all links data
-                        ProcessLinksAsync(true);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.Write(ex.Message);
-                Toast.MakeText(this, "Ups! Link is not added", ToastLength.Short).Show();
-            }
-        }
-
-        // Send link received to the service and retrieve existing links
-        private void DeleteLink(int linkId)
-        {
-            try
-            {
-                // Create a simple web request using the URL:
-                WebRequest request = WebRequest.Create(url + "link/" + linkId);
-                request.Method = "DELETE";
-
-                // Send the request to the server and wait for the response:
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    Toast.MakeText(this, "Link deleted", ToastLength.Short).Show();
-
-                    // Retrieve all links data again
-                    ProcessLinksAsync(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.Write(ex.Message);
-                Toast.MakeText(this, "Ups! Link is not deleted", ToastLength.Short).Show();
-            }
-        }
+        }        
 
         // Get and parse data from links service
         private async void ProcessLinksAsync(bool getFromService = false)
@@ -176,7 +153,10 @@ namespace linkame
             if (json == null)
             {
                 // Get the links information from service 
-                json = await GetLinksAsync(url + "links");
+                json = await RestService.GetLinksAsync(linksPath);
+
+                if (json == null)
+                    Toast.MakeText(this, "Ups! Links cannot be loaded from service", ToastLength.Short).Show();
             }
 
             // parse the results, then update the screen:
@@ -197,47 +177,7 @@ namespace linkame
                 Console.Error.Write(ex.Message);
                 return null;
             }
-        }
-
-        // Gets links data from the passed URL.
-        private async Task<JsonValue> GetLinksAsync(string url)
-        {
-            try
-            {
-                // Create an HTTP web request using the URL:
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url));
-                request.ContentType = "application/json";
-                request.Method = "GET";
-
-                // Send the request to the server and wait for the response:
-                using (WebResponse response = await request.GetResponseAsync())
-                {
-                    // Get a stream representation of the HTTP web response:
-                    using (Stream stream = response.GetResponseStream())
-                    {
-                        // Use this stream to build a JSON document object:
-                        JsonValue jsonDoc = await Task.Run(() => JsonObject.Load(stream));
-                        Console.Out.WriteLine("Response: {0}", jsonDoc.ToString());
-
-                        // Save the list on a local file
-                        using (StreamWriter sw = File.CreateText(linksPath))
-                        {
-                            sw.Write(jsonDoc.ToString());
-                            sw.Close();
-                        }
-
-                        // Return the JSON document:
-                        return jsonDoc;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.Write(ex.Message);
-                Toast.MakeText(this, "Ups! Links cannot be loaded", ToastLength.Short).Show();
-                return null;
-            }
-        }
+        }        
         
         // Parse the links data, then write that info to the screen.
         private void ParseAndDisplay(JsonValue json, bool reloadFromService = false)
@@ -264,7 +204,6 @@ namespace linkame
                 this.ListAdapter = adapter;
 
                 // Handle the list click
-                //ListView listView = this.FindViewById<ListView>(Android.Resource.Id.List);
                 this.ListView.ItemClick += listView_ItemClick;
             });        
               

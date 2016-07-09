@@ -2,4 +2,6 @@
 <resources>
     <string name="Hello">Hello World, Click Me!</string>
     <string name="ApplicationName">Linkame</string>
+  <string name="add_device">Add device</string>
+  <string name="save_device">Save device</string>
 </resources>

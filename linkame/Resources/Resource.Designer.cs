@@ -44,8 +44,11 @@ namespace linkame
 		public partial class Color
 		{
 			
-			// aapt resource value: 0x7f030000
-			public const int white = 2130903040;
+			// aapt resource value: 0x7f040001
+			public const int dark = 2130968577;
+			
+			// aapt resource value: 0x7f040000
+			public const int white = 2130968576;
 			
 			static Color()
 			{
@@ -61,7 +64,10 @@ namespace linkame
 		{
 			
 			// aapt resource value: 0x7f020000
-			public const int Icon = 2130837504;
+			public const int ic_important_devices_black_24dp = 2130837504;
+			
+			// aapt resource value: 0x7f020001
+			public const int Icon = 2130837505;
 			
 			static Drawable()
 			{
@@ -73,14 +79,61 @@ namespace linkame
 			}
 		}
 		
+		public partial class Id
+		{
+			
+			// aapt resource value: 0x7f070002
+			public const int add_device = 2131165186;
+			
+			// aapt resource value: 0x7f070001
+			public const int btSave = 2131165185;
+			
+			// aapt resource value: 0x7f070000
+			public const int tvDevice = 2131165184;
+			
+			static Id()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Id()
+			{
+			}
+		}
+		
+		public partial class Layout
+		{
+			
+			// aapt resource value: 0x7f030000
+			public const int AddDevice = 2130903040;
+			
+			// aapt resource value: 0x7f030001
+			public const int MainMenu = 2130903041;
+			
+			static Layout()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Layout()
+			{
+			}
+		}
+		
 		public partial class String
 		{
 			
-			// aapt resource value: 0x7f040001
-			public const int ApplicationName = 2130968577;
+			// aapt resource value: 0x7f050001
+			public const int ApplicationName = 2131034113;
 			
-			// aapt resource value: 0x7f040000
-			public const int Hello = 2130968576;
+			// aapt resource value: 0x7f050000
+			public const int Hello = 2131034112;
+			
+			// aapt resource value: 0x7f050002
+			public const int add_device = 2131034114;
+			
+			// aapt resource value: 0x7f050003
+			public const int save_device = 2131034115;
 			
 			static String()
 			{
@@ -95,8 +148,8 @@ namespace linkame
 		public partial class Style
 		{
 			
-			// aapt resource value: 0x7f050000
-			public const int MyCustomTheme = 2131034112;
+			// aapt resource value: 0x7f060000
+			public const int MyCustomTheme = 2131099648;
 			
 			static Style()
 			{
