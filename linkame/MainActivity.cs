@@ -188,10 +188,21 @@ namespace linkame
 
             if (json.Count > 0)
             {
-                // Serialize reveived json
-                foreach (var item in json as JsonObject)
+                if (json.GetType() == typeof(JsonObject))
                 {
-                    links.Add(new Link(item.Value["id"], item.Value["name"], item.Value["url"]));
+                    // Serialize reveived json
+                    foreach (var item in json as JsonObject)
+                    {
+                        links.Add(new Link(item.Value["id"], item.Value["name"], item.Value["url"]));
+                    }
+                }
+                else if (json.GetType() == typeof(JsonArray))
+                {
+                    // Serialize reveived json
+                    foreach (var item in json as JsonArray)
+                    {
+                        links.Add(new Link(item["id"], item["name"], item["url"]));
+                    }
                 }
             }
                         

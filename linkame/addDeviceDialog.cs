@@ -45,11 +45,14 @@ namespace linkame
                 if (string.IsNullOrWhiteSpace(textView.Text) || device == textView.Text)
                     return;
 
-
+                string key = RestService.GetDeviceKey(textView.Text);
+                if (string.IsNullOrWhiteSpace(key))
+                    return;
 
                 ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this.Dialog.Context);
                 ISharedPreferencesEditor editor = prefs.Edit();
                 editor.PutString("device", textView.Text);
+                editor.PutString("key", key);
                 editor.Apply();
 
                 Toast.MakeText(Activity, String.Format("Device {0} saved", textView.Text), ToastLength.Short).Show();

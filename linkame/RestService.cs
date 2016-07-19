@@ -14,6 +14,7 @@ using linkame.Models;
 using System.Json;
 using System.Net;
 using System.IO;
+using Android.Preferences;
 
 namespace linkame
 {
@@ -27,10 +28,20 @@ namespace linkame
         {
             try
             {
+                // Check if we have a device saved on preferences
+                ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
+                string device = getprefs.GetString("device", string.Empty);
+                string key = getprefs.GetString("key", string.Empty);
+
+                string urlLinks = url + "links";
+                if (!string.IsNullOrWhiteSpace(device) && !string.IsNullOrWhiteSpace(key))
+                    urlLinks += string.Format("/{0}?key={1}", device, Uri.EscapeDataString(key));
+
                 // Create an HTTP web request using the URL:
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url + "links"));
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(urlLinks));
                 request.ContentType = "application/json";
                 request.Method = "GET";
+
 
                 // Send the request to the server and wait for the response:
                 using (WebResponse response = await request.GetResponseAsync())
@@ -38,6 +49,11 @@ namespace linkame
                     // Get a stream representation of the HTTP web response:
                     using (Stream stream = response.GetResponseStream())
                     {
+                        /*if (stream == null || stream.Length < 5)
+                        {
+                            return null;
+                        }*/
+
                         // Use this stream to build a JSON document object:
                         JsonValue jsonDoc = await Task.Run(() => JsonObject.Load(stream));
                         Console.Out.WriteLine("Response: {0}", jsonDoc.ToString());
@@ -57,9 +73,9 @@ namespace linkame
             catch (Exception ex)
             {
                 Console.Error.Write(ex.Message);
-                //Toast.MakeText(this, "Ups! Links cannot be loaded", ToastLength.Short).Show();
-                return null;
             }
+
+            return null;
         }
 
         // Send link received to the service and retrieve existing links
@@ -67,11 +83,17 @@ namespace linkame
         {
             try
             {
-                //string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "name not available";
-                //string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
+                // Check if we have a device saved on preferences
+                ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
+                string device = getprefs.GetString("device", string.Empty);
+                string key = getprefs.GetString("key", string.Empty);
+
+                string urlLink = url + "link";
+                if (!string.IsNullOrWhiteSpace(device) && !string.IsNullOrWhiteSpace(key))
+                    urlLink += string.Format("/{0}?key={1}", device, Uri.EscapeDataString(key));
 
                 // Create an HTTP web request using the URL:
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url + "link"));
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(urlLink));
                 request.ContentType = "application/json";
                 request.Method = "POST";
 
@@ -89,10 +111,6 @@ namespace linkame
                 {
                     if (response.StatusCode == HttpStatusCode.Created)
                     {
-                        //Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
-
-                        // Retrieve all links data
-                        //ProcessLinksAsync(true);
                         return true;
                     }
                 }
@@ -100,7 +118,6 @@ namespace linkame
             catch (Exception ex)
             {
                 Console.Error.Write(ex.Message);
-                //Toast.MakeText(this, "Ups! Link is not added", ToastLength.Short).Show();
             }
 
             return false;
@@ -111,27 +128,68 @@ namespace linkame
         {
             try
             {
+                // Check if we have a device saved on preferences
+                ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
+                string device = getprefs.GetString("device", string.Empty);
+                string key = getprefs.GetString("key", string.Empty);
+
+                string urlLinks = url + "link/" + linkId;
+                if (!string.IsNullOrWhiteSpace(device) && !string.IsNullOrWhiteSpace(key))
+                    urlLinks += string.Format("/{0}?key={1}", device, Uri.EscapeDataString(key));
+
                 // Create a simple web request using the URL:
-                WebRequest request = WebRequest.Create(url + "link/" + linkId);
+                WebRequest request = WebRequest.Create(urlLinks);
                 request.Method = "DELETE";
 
                 // Send the request to the server and wait for the response:
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    //Toast.MakeText(this, "Link deleted", ToastLength.Short).Show();
-
-                    // Retrieve all links data again
-                    //ProcessLinksAsync(true);
                     return true;
                 }
             }
             catch (Exception ex)
             {
                 Console.Error.Write(ex.Message);
-                //Toast.MakeText(this, "Ups! Link is not deleted", ToastLength.Short).Show();
             }
             return false;
+        }
+
+        // Gets device key
+        public static string GetDeviceKey(string device)
+        {
+            try
+            {
+                // Create an HTTP web request using the URL:
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url + "device/" + device));
+                request.ContentType = "text/plain";
+                request.Method = "GET";
+
+                // Send the request to the server and wait for the response:
+                using (WebResponse response = request.GetResponse())
+                {
+                    // Get a stream representation of the HTTP web response:
+                    using (Stream stream = response.GetResponseStream())
+                    {
+                        // Read the received data
+                        using (StreamReader sr = new StreamReader(stream))
+                        {
+                            string result = sr.ReadToEnd();
+                            Console.Out.WriteLine("Response: {0}", result);
+
+                            // Return the received key
+                            return result;
+                        }                        
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.Write(ex.Message);
+            }
+
+            return string.Empty;
         }
     }
 }
