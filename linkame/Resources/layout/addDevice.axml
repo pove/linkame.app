@@ -3,10 +3,10 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-   <EditText
+    <EditText
         android:id="@+id/tvDevice"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
     <Button
         android:text="@string/save_device"
         android:layout_width="match_parent"

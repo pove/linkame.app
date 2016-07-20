@@ -16,7 +16,7 @@ namespace linkame
     [Activity(Label = "Add device")]
     public class AddDeviceDialog : DialogFragment
     {
-        private string device;
+        public event DialogEventHandler Dismissed;
 
         public override void OnCreate(Bundle savedInstanceState)
         {
@@ -32,9 +32,6 @@ namespace linkame
             var view = inflater.Inflate(Resource.Layout.AddDevice, container, false);                   
 
             var textView = view.FindViewById<TextView>(Resource.Id.tvDevice);
-            ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(this.Dialog.Context);
-            device = getprefs.GetString("device", string.Empty);
-            textView.Text = device;
 
             textView.InputType = Android.Text.InputTypes.TextFlagCapCharacters;
             textView.RequestFocus();
@@ -42,20 +39,38 @@ namespace linkame
 
             view.FindViewById<Button>(Resource.Id.btSave).Click += delegate
             {
-                if (string.IsNullOrWhiteSpace(textView.Text) || device == textView.Text)
+                int devicesNumber = 0;
+
+                if (string.IsNullOrWhiteSpace(textView.Text))
                     return;
 
                 string key = RestService.GetDeviceKey(textView.Text);
                 if (string.IsNullOrWhiteSpace(key))
+                {
+                    Toast.MakeText(Activity, "Cannot get device from server", ToastLength.Short).Show();
                     return;
+                }
 
                 ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this.Dialog.Context);
+
+                // Get current devices number
+                devicesNumber = prefs.GetInt("devicesnum", devicesNumber);
+
                 ISharedPreferencesEditor editor = prefs.Edit();
+                // Add new device
+                editor.PutInt("devicesnum", ++devicesNumber);
+                editor.PutString("device" + devicesNumber, textView.Text);
+                editor.PutString("key" + devicesNumber, key);
+
+                // Select current device
                 editor.PutString("device", textView.Text);
                 editor.PutString("key", key);
+
                 editor.Apply();
 
-                Toast.MakeText(Activity, String.Format("Device {0} saved", textView.Text), ToastLength.Short).Show();
+                if (null != Dismissed)
+                    Dismissed(this, new DialogEventArgs { Text = String.Format("Device {0} saved", textView.Text) });
+
                 Dismiss();
             };
 

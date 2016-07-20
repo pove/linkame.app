@@ -4,4 +4,6 @@
     <string name="ApplicationName">Linkame</string>
   <string name="add_device">Add device</string>
   <string name="save_device">Save device</string>
+  <string name="select_device">Select device</string>
+  <string name="long_tap_delete">Tap to select, long tap to delete</string>
 </resources>

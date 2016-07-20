@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapters\LinkAdapter.cs" />
+    <Compile Include="SelectDeviceDialog .cs" />
     <Compile Include="AddDeviceDialog.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Models\Link.cs" />
@@ -61,10 +62,18 @@
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
+    <AndroidResource Include="Resources\drawable-hdpi\ic_add_black_24dp.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\ic_add_black_24dp.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_add_black_24dp.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_add_black_24dp.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_add_black_24dp.png" />
     <AndroidResource Include="Resources\layout\AddDevice.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
     <AndroidResource Include="Resources\layout\MainMenu.axml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+    <AndroidResource Include="Resources\layout\SelectDevice.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -86,7 +95,6 @@
   <ItemGroup>
     <AndroidResource Include="Resources\values-v21\Colors.xml" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_important_devices_black_24dp.png" />
   </ItemGroup>

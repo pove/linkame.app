@@ -12,6 +12,7 @@ using System.IO;
 using linkame.Adapters;
 using linkame.Models;
 using System.Collections.Generic;
+using Android.Preferences;
 
 namespace linkame
 {
@@ -40,20 +41,40 @@ namespace linkame
             }
             else
             {
-                // If so, send link data to the service
-                string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "Name not available";
-                string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
-                if (RestService.SendLink(intentName, intentUrl))
+                ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(this);
+                // If we have more than one device, open device selector
+                if (getprefs.GetInt("devicesnum", 0) > 1)
                 {
-                    Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
+                    ShowSelectDeviceDialog(true);
 
-                    // Retrieve all links data
-                    ProcessLinksAsync(true);
+                    // In the meanwhile, retrieve links data from local file or service
+                    ProcessLinksAsync();
                 }
                 else
                 {
-                    Toast.MakeText(this, "Ups! Link is not added", ToastLength.Short).Show();
+                    sendLinkFromIntent();
                 }
+            }
+        }
+
+        private void sendLinkFromIntent()
+        {
+            // Send link data to the service
+            string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "Name not available";
+            string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
+            if (RestService.SendLink(intentName, intentUrl))
+            {
+                Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
+
+                // Retrieve all links data
+                ProcessLinksAsync(true);
+            }
+            else
+            {
+                Toast.MakeText(this, "Ups! Link is not added", ToastLength.Short).Show();
+
+                // Retrieve links data from local file or service
+                ProcessLinksAsync();
             }
         }
 
@@ -79,6 +100,9 @@ namespace linkame
                 case Resource.Id.add_device:
                     ShowAddDeviceDialog();
                     return true;
+                case Resource.Id.select_device:
+                    ShowSelectDeviceDialog();
+                    return true;
             }
             return base.OnOptionsItemSelected(item);
         }
@@ -86,8 +110,37 @@ namespace linkame
         public void ShowAddDeviceDialog()
         {
             var transaction = FragmentManager.BeginTransaction();
-            var dialogFragment = new AddDeviceDialog();            
-            dialogFragment.Show(transaction, "Add device");
+            var dialogFragment = new AddDeviceDialog();
+            dialogFragment.Dismissed += (s, e) =>
+            {
+                Toast.MakeText(this, e.Text, ToastLength.Short).Show();
+
+                // Get links data from service
+                ProcessLinksAsync(true);
+            };
+            dialogFragment.Show(transaction, GetString(Resource.String.add_device));
+        }
+
+        public void ShowSelectDeviceDialog(bool disableDelete = false)
+        {
+            var transaction = FragmentManager.BeginTransaction();
+            var dialogFragment = new SelectDeviceDialog();
+            dialogFragment.Dismissed += (s, e) => {
+
+                // If delete is disabled means that we are sending a link from intent
+                if (disableDelete)
+                {
+                    sendLinkFromIntent();
+                }
+                else
+                {
+                    Toast.MakeText(this, e.Text, ToastLength.Short).Show();
+
+                    // Get links data from service
+                    ProcessLinksAsync(true);
+                }
+            };
+            dialogFragment.Show(transaction, (disableDelete ? "disableDelete" : null));            
         }
 
         void listView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
@@ -160,8 +213,10 @@ namespace linkame
             }
 
             // parse the results, then update the screen:
-            if (json != null)
+            if (json != null || getFromService)
+            {
                 ParseAndDisplay(json, reloadFromService);
+            }
         }
 
         private JsonValue GetLinksFromFile()
@@ -186,7 +241,7 @@ namespace linkame
             this.ListView.ItemClick -= listView_ItemClick;
             links.Clear();
 
-            if (json.Count > 0)
+            if (json != null && json.Count > 0)
             {
                 if (json.GetType() == typeof(JsonObject))
                 {

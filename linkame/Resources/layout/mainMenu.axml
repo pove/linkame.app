@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item
-      android:id="@+id/add_device"
-      android:icon="@drawable/ic_important_devices_black_24dp"
-      android:title="@string/add_device"
-      android:showAsAction="always" />
+    <item
+        android:id="@+id/add_device"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="@string/add_device"
+        android:showAsAction="always" />
+    <item
+        android:id="@+id/select_device"
+        android:icon="@drawable/ic_important_devices_black_24dp"
+        android:title="@string/select_device"
+        android:showAsAction="always" />
 </menu>
