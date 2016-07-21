@@ -113,7 +113,7 @@ namespace linkame
             if (string.IsNullOrEmpty(selectedName))
                 alert.SetMessage(string.Format("¿Do you want to delete device {0}?", selectedDevice));
             else
-                alert.SetMessage(string.Format("¿Do you want to delete device {0} ({1})?", selectedName));
+                alert.SetMessage(string.Format("¿Do you want to delete device {0} ({1})?", selectedDevice, selectedName));
 
             // Delete selected device
             alert.SetPositiveButton("Delete", (senderAlert, args) =>
