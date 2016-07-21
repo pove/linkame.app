@@ -24,14 +24,21 @@ namespace linkame
     public class MainActivity : ListActivity
     {
         // Local file to store links
-        string linksPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "linkslist.json");
+        string linksPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "linkslist{0}.json");
 
         // Links list
         List<Link> links = new List<Link>();
 
+        // Main preferences
+        string device = string.Empty;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
+            // Get main preferences
+            ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(this);
+            device = getprefs.GetString("device", string.Empty);
 
             // Check if we are receiving something from intent filter
             if (String.IsNullOrEmpty(Intent.GetStringExtra(Intent.ExtraText)))
@@ -41,7 +48,6 @@ namespace linkame
             }
             else
             {
-                ISharedPreferences getprefs = PreferenceManager.GetDefaultSharedPreferences(this);
                 // If we have more than one device, open device selector
                 if (getprefs.GetInt("devicesnum", 0) > 1)
                 {
@@ -55,6 +61,8 @@ namespace linkame
                     sendLinkFromIntent();
                 }
             }
+
+            getprefs.Dispose();
         }
 
         private void sendLinkFromIntent()
@@ -115,8 +123,12 @@ namespace linkame
             {
                 Toast.MakeText(this, e.Text, ToastLength.Short).Show();
 
-                // Get links data from service
-                ProcessLinksAsync(true);
+                // Update main preferences
+                device = e.Device;
+
+                // Get links data
+                ResetList();
+                ProcessLinksAsync();
             };
             dialogFragment.Show(transaction, GetString(Resource.String.add_device));
         }
@@ -127,6 +139,9 @@ namespace linkame
             var dialogFragment = new SelectDeviceDialog();
             dialogFragment.Dismissed += (s, e) => {
 
+                // Update main preferences
+                device = e.Device;
+
                 // If delete is disabled means that we are sending a link from intent
                 if (disableDelete)
                 {
@@ -136,8 +151,9 @@ namespace linkame
                 {
                     Toast.MakeText(this, e.Text, ToastLength.Short).Show();
 
-                    // Get links data from service
-                    ProcessLinksAsync(true);
+                    // Get links data
+                    ResetList();
+                    ProcessLinksAsync();
                 }
             };
             dialogFragment.Show(transaction, (disableDelete ? "disableDelete" : null));            
@@ -197,7 +213,7 @@ namespace linkame
             JsonValue json = null;
             bool reloadFromService = false;
 
-            if (!getFromService && File.Exists(linksPath))
+            if (!getFromService && File.Exists(GetDevicePath()))
             {
                 json = GetLinksFromFile();
                 reloadFromService = true;
@@ -206,17 +222,15 @@ namespace linkame
             if (json == null)
             {
                 // Get the links information from service 
-                json = await RestService.GetLinksAsync(linksPath);
+                json = await RestService.GetLinksAsync(GetDevicePath());
 
                 if (json == null)
                     Toast.MakeText(this, "Ups! Links cannot be loaded from service", ToastLength.Short).Show();
             }
 
             // parse the results, then update the screen:
-            if (json != null || getFromService)
-            {
+            if (json != null)
                 ParseAndDisplay(json, reloadFromService);
-            }
         }
 
         private JsonValue GetLinksFromFile()
@@ -224,7 +238,7 @@ namespace linkame
             try
             {
                 // Get the links information from local file
-                string fileText = File.ReadAllText(linksPath);
+                string fileText = File.ReadAllText(GetDevicePath());
                 return JsonValue.Parse(fileText);
             }
             catch (Exception ex)
@@ -278,6 +292,21 @@ namespace linkame
             {
                 ProcessLinksAsync(true);
             }
+        }
+
+        private void ResetList()
+        {
+            this.ListView.ItemClick -= listView_ItemClick;
+            links.Clear();
+            RunOnUiThread(() =>
+            {
+                this.ListAdapter = null;
+            });
+        }
+
+        private string GetDevicePath()
+        {
+            return string.Format(linksPath, device);
         }
     }
 }

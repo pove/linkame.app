@@ -85,23 +85,29 @@ namespace linkame
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f070002
-			public const int add_device = 2131165186;
-			
-			// aapt resource value: 0x7f070001
-			public const int btSave = 2131165185;
-			
-			// aapt resource value: 0x7f070005
-			public const int lvDevices = 2131165189;
+			// aapt resource value: 0x7f070004
+			public const int add_device = 2131165188;
 			
 			// aapt resource value: 0x7f070003
-			public const int select_device = 2131165187;
+			public const int btSave = 2131165187;
+			
+			// aapt resource value: 0x7f070007
+			public const int lvDevices = 2131165191;
+			
+			// aapt resource value: 0x7f070005
+			public const int select_device = 2131165189;
 			
 			// aapt resource value: 0x7f070000
-			public const int tvDevice = 2131165184;
+			public const int textView1 = 2131165184;
 			
-			// aapt resource value: 0x7f070004
-			public const int tvSelectDeviceInfo = 2131165188;
+			// aapt resource value: 0x7f070001
+			public const int tvDevice = 2131165185;
+			
+			// aapt resource value: 0x7f070002
+			public const int tvDeviceName = 2131165186;
+			
+			// aapt resource value: 0x7f070006
+			public const int tvSelectDeviceInfo = 2131165190;
 			
 			static Id()
 			{
@@ -147,14 +153,20 @@ namespace linkame
 			// aapt resource value: 0x7f050002
 			public const int add_device = 2131034114;
 			
-			// aapt resource value: 0x7f050005
-			public const int long_tap_delete = 2131034117;
-			
 			// aapt resource value: 0x7f050003
-			public const int save_device = 2131034115;
+			public const int add_device_device = 2131034115;
 			
 			// aapt resource value: 0x7f050004
-			public const int select_device = 2131034116;
+			public const int add_device_name = 2131034116;
+			
+			// aapt resource value: 0x7f050007
+			public const int long_tap_delete = 2131034119;
+			
+			// aapt resource value: 0x7f050005
+			public const int save_device = 2131034117;
+			
+			// aapt resource value: 0x7f050006
+			public const int select_device = 2131034118;
 			
 			static String()
 			{

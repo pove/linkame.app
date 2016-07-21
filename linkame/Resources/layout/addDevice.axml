@@ -3,8 +3,26 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:text="@string/add_device_device"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView1"
+        android:paddingLeft="2dp" />
     <EditText
         android:id="@+id/tvDevice"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:text="@string/add_device_name"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView1"
+        android:paddingLeft="2dp" />
+    <EditText
+        android:id="@+id/tvDeviceName"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
     <Button
