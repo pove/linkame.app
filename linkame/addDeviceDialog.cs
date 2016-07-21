@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,8 @@ namespace linkame
     {
         public event DialogEventHandler Dismissed;
 
+        //ISharedPreferences prefs;
+
         public override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -31,7 +33,22 @@ namespace linkame
 
             var view = inflater.Inflate(Resource.Layout.AddDevice, container, false);                   
 
-            var textView = view.FindViewById<TextView>(Resource.Id.tvDevice);
+            var textView = view.FindViewById<AutoCompleteTextView>(Resource.Id.tvDevice);
+
+            ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this.Dialog.Context);
+            // Get current devices number
+            int devicesNumber = prefs.GetInt("devicesnum", 0);
+            List<string> devices = new List<string>();
+            for (int i = 1; i <= devicesNumber; i++)
+            {
+                string dev = prefs.GetString("device" + i, string.Empty);
+                if (!string.IsNullOrEmpty(dev))
+                    devices.Add(dev);
+            }
+
+            // Add autocomplete list with devices (usefull to edit one)
+            ArrayAdapter dictionaryAdapter = new ArrayAdapter(this.Dialog.Context, Android.Resource.Layout.SimpleDropDownItem1Line, devices);
+            textView.Adapter = dictionaryAdapter;
 
             // Show keyboard on capital letters
             textView.InputType = Android.Text.InputTypes.TextFlagCapCharacters;
@@ -44,8 +61,6 @@ namespace linkame
 
             view.FindViewById<Button>(Resource.Id.btSave).Click += delegate
             {
-                int devicesNumber = 0;
-
                 if (string.IsNullOrWhiteSpace(textView.Text))
                     return;
 
@@ -55,25 +70,11 @@ namespace linkame
                     Toast.MakeText(Activity, "Cannot get device from server", ToastLength.Short).Show();
                     return;
                 }
-
-                ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this.Dialog.Context);
+                
                 ISharedPreferencesEditor editor = prefs.Edit();
 
-                // Get current devices number
-                devicesNumber = prefs.GetInt("devicesnum", devicesNumber);
-
                 // Check if already exists
-                int devicePosition = 0;
-                List<string> devices = new List<string>();
-                for (int i = 1; i <= devicesNumber; i++)
-                {
-                    string dev = prefs.GetString("device" + i, string.Empty);
-                    if (dev == textView.Text)
-                    {
-                        devicePosition = i;
-                        break;
-                    }
-                }
+                int devicePosition = devices.FindIndex(x => x == textView.Text) + 1;
 
                 if (devicePosition == 0)
                 {
