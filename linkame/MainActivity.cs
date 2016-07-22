@@ -70,6 +70,11 @@ namespace linkame
             // Send link data to the service
             string intentName = Intent.GetStringExtra(Intent.ExtraSubject) ?? "Name not available";
             string intentUrl = Intent.GetStringExtra(Intent.ExtraText) ?? "url not available";
+
+            // Get only the url (usefull when link comes from Google Maps)
+            int firstHttp = intentUrl.IndexOf("http");
+            intentUrl = intentUrl.Substring(Math.Max(0, firstHttp));
+
             if (RestService.SendLink(intentName, intentUrl))
             {
                 Toast.MakeText(this, "Added " + intentName, ToastLength.Short).Show();
@@ -178,10 +183,17 @@ namespace linkame
 
             alert.SetPositiveButton("Open link", (senderAlert, args) =>
             {
-                // Open link on default navigator
-                var uri = Android.Net.Uri.Parse(link.Url);
-                var intent = new Intent(Intent.ActionView, uri);
-                StartActivity(intent);
+                try
+                {
+                    // Open link on default navigator
+                    var uri = Android.Net.Uri.Parse(link.Url);
+                    var intent = new Intent(Intent.ActionView, uri);
+                    StartActivity(intent);
+                }
+                catch
+                {
+                    Toast.MakeText(this, "Sorry, I cannot open this link", ToastLength.Short).Show();
+                }
             });
 
             alert.SetNegativeButton("Delete", (senderAlert, args) =>
