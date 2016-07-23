@@ -5,7 +5,7 @@ Linkame Android App with [Visual Studio Community](https://www.visualstudio.com/
 Download and install Visual Studio Community and Xamarin Platform from [Xamarin download page](https://www.xamarin.com/download).
 
 ## Setup
-You only need to set the Rest service URL. Open `linkame/RestService.cs` and change the next code with your own:
+You only need to set the Rest service URL of your [linkame api](https://github.com/pove/linkame/tree/master/api). Open `linkame/RestService.cs` and change the next code with your own:
 
 ```c#
 ...
