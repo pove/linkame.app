@@ -21,7 +21,7 @@ namespace linkame
     public static class RestService
     {
         // Links rest api url
-        private const string url = "http://link.pove.com.es/"; //"http://192.168.0.X/linkame/api/public/";
+        private const string url = "http://link.pove.es/"; //"http://192.168.0.X/linkame/api/public/";
 
         // Gets links data from the passed URL.
         public static async Task<JsonValue> GetLinksAsync(string linksPath)
